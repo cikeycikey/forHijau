@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interaktif: Permintaan Maaf untuk Meov</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1:#e8f8ee; --bg2:#c6f0d1; --accent1:#2e7d32; --accent2:#66bb6a; --soft:#ffffffcc;
+      --glass: rgba(255,255,255,0.16);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:'Poppins',sans-serif;background:linear-gradient(135deg,var(--bg1),#b2f0c4,var(--bg2));background-size:400% 400%;animation:bgMove 18s linear infinite;}
+    @keyframes bgMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+    /* App container */
+    .app{height:100vh;display:grid;place-items:center;padding:28px}
+
+    /* common card */
+    .card{width:min(920px,96%);max-width:1100px;border-radius:20px;padding:28px;backdrop-filter: blur(8px);background:var(--glass);box-shadow:0 12px 40px rgba(6,80,37,.12);position:relative;overflow:hidden}
+
+    /* header small */
+    .topbar{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+    .logo{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--accent2),var(--accent1));display:grid;place-items:center;color:#fff;font-weight:700;font-size:20px}
+    .title{font-family:'Dancing Script',cursive;font-size:26px;color:var(--accent1)}
+
+    /* full pages system */
+    .page{display:none;padding:10px}
+    .page.active{display:block}
+
+    /* Envelope page */
+    .envelope-wrap{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center}
+    .env-left{padding:18px}
+    .env-right{display:flex;justify-content:center}
+    .envelope{width:260px;height:180px;border-radius:14px;background:linear-gradient(180deg,#fff,#f6fff6);border:2px solid rgba(46,125,50,.12);display:grid;place-items:center;position:relative;cursor:pointer;box-shadow:0 8px 30px rgba(16,90,41,.08);transition:transform .25s}
+    .envelope:hover{transform:translateY(-6px)}
+    .env-flap{position:absolute;top:0;left:0;right:0;height:60%;background:linear-gradient(135deg,#dff5e8,#bff0cf);border-bottom-left-radius:14px;border-bottom-right-radius:14px;transform-origin:top;transition:transform .6s;display:grid;place-items:center}
+    .env-stamp{position:absolute;right:14px;top:12px;width:54px;height:54px;border-radius:10px;background:linear-gradient(45deg,#66bb6a,#2e7d32);color:white;display:grid;place-items:center;font-weight:700}
+    .env-open .env-flap{transform:rotateX(180deg)}
+
+    .env-paper{width:86%;height:72%;background:linear-gradient(180deg,#fff,#f8fff8);border-radius:8px;display:grid;place-items:center;padding:10px;font-weight:600;color:var(--accent1)}
+
+    /* question card */
+    .qbox{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+    .qtext{flex:1 1 400px}
+    .qbtn{display:flex;gap:12px}
+    .btn{padding:12px 20px;border-radius:14px;border:0;background:linear-gradient(90deg,var(--accent2),var(--accent1));color:white;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(46,125,50,.18);transition:transform .18s,box-shadow .18s}
+    .btn.ghost{background:transparent;color:var(--accent1);border:2px solid rgba(46,125,50,.14)}
+    .btn:hover{transform:translateY(-4px)}
+
+    /* apology page */
+    .apology{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+    .ap-left{padding:10px}
+    .ap-right{display:flex;flex-direction:column;gap:10px;align-items:center}
+    .msg{background:linear-gradient(180deg,#fff,#f8fff8);border:1px solid rgba(46,125,50,.08);padding:18px;border-radius:14px;font-size:18px;line-height:1.6;min-height:120px;box-shadow:0 6px 16px rgba(20,80,30,.04)}
+    .controls{display:flex;gap:10px;align-items:center;margin-top:12px}
+
+    .cute-list{display:flex;flex-direction:column;gap:10px}
+    .cute-img{width:100%;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+
+    /* final pages */
+    .centered{display:grid;place-items:center;text-align:center;padding:24px}
+    .linkline{display:inline-block;padding:12px 28px;border-radius:999px;background:linear-gradient(90deg,#00c300,#2e7d32);color:white;text-decoration:none;font-weight:700}
+
+    /* floating hearts & animals */
+    .float{position:fixed;pointer-events:none;z-index:1000}
+    .float.s1{left:12%;animation:fly1 8s linear infinite}
+    .float.s2{left:30%;animation:fly2 10s linear infinite}
+    .float.s3{left:75%;animation:fly3 9s linear infinite}
+    @keyframes fly1{0%{transform:translateY(100vh) scale(.8) rotate(0)}100%{transform:translateY(-20vh) scale(1.1) rotate(360deg)}}
+    @keyframes fly2{0%{transform:translateY(110vh) scale(.9) rotate(0)}100%{transform:translateY(-10vh) scale(1.05) rotate(-360deg)}}
+    @keyframes fly3{0%{transform:translateY(120vh) scale(.7) rotate(0)}100%{transform:translateY(-5vh) scale(1.2) rotate(360deg)}}
+
+    /* small helpers */
+    .muted{color:rgba(11,46,19,.7)}
+    .hidden{display:none}
+
+    /* responsive */
+    @media (max-width:800px){.apology{grid-template-columns:1fr;}.envelope{width:220px;height:150px}.env-stamp{width:44px;height:44px}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card" id="appCard">
+      <div class="topbar"><div class="logo">💚</div><div class="title">Cerita Hijau & Meov</div></div>
+
+      <!-- PAGE: Envelope landing -->
+      <section id="pageEnvelope" class="page active">
+        <div class="envelope-wrap">
+          <div class="env-left">
+            <h2 style="margin:6px 0 8px;color:var(--accent1)">Sebuah surat kecil untukmu</h2>
+            <p class="muted">Klik amplop untuk membukanya — ada pesan penting dari Meov untuk Hijau.</p>
+            <div style="margin-top:18px;display:flex;gap:10px;align-items:center">
+              <button class="btn" onclick="openEnvelope()">Buka Amplop</button>
+              <button class="btn ghost" onclick="resetAll()">Mulai Ulang</button>
+            </div>
+          </div>
+          <div class="env-right">
+            <div id="envelope" class="envelope" role="button" aria-label="Amplop" onclick="openEnvelope()">
+              <div class="env-flap">📨</div>
+              <div class="env-stamp">Dear</div>
+              <div class="env-paper">Klik untuk membuka</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: Question 1 -->
+      <section id="pageQ1" class="page">
+        <div class="qbox">
+          <div class="qtext">
+            <h2 style="margin:0;color:var(--accent1)">Apakah kamu si <strong>Hijau</strong> yang selalu bermain bersama <strong>Meov</strong>?</h2>
+          </div>
+          <div class="qbtn">
+            <button class="btn" onclick="answerQ1(true)">Iya</button>
+            <button class="btn ghost" onclick="answerQ1(false)">Tidak</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: Apology -->
+      <section id="pageApology" class="page">
+        <div class="apology">
+          <div class="ap-left">
+            <h3 style="margin:6px 0;color:var(--accent1)">Permintaan Maaf</h3>
+            <div id="msg" class="msg">--</div>
+            <div class="controls">
+              <button class="btn" id="prevMsg">⟵ Sebelumnya</button>
+              <button class="btn" id="nextMsg">Berikutnya ⟶</button>
+              <button class="btn ghost" id="copyMsg">Salin</button>
+            </div>
+            <p class="muted" style="margin-top:10px">Baca semua pesan sampai selesai</p>
+          </div>
+          <aside class="ap-right">
+            <div style="text-align:center;margin-top:8px"><small class="muted">Hehe — Surat pemintaan maaf meov untuk si hijau 💚</small></div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- PAGE: Question 2 -->
+      <section id="pageQ2" class="page">
+        <div class="centered">
+          <h2 style="color:var(--accent1)">Setelah membaca, apakah Hijau masih marah kepada Meov?</h2>
+          <div style="margin-top:18px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+            <button class="btn" onclick="answerQ2(false)">Tidak, sudah tidak marah</button>
+            <button class="btn ghost" onclick="answerQ2(true)">Iya, masih marah</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: LINE contact -->
+      <section id="pageLine" class="page">
+        <div class="centered">
+          <h2 style="color:var(--accent1)">Terima kasih telah membaca</h2>
+          <p class="muted">Jika kamu bersedia memaafkan, silakan kirim pesan lewat LINE. Tombol akan membuka LINE dengan pesan siap pakai.</p>
+          <div style="margin-top:18px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+            <a id="lineLink" class="linkline" href="#" target="_blank" rel="noopener">Kirim Balasan di LINE</a>
+            <button class="btn ghost" onclick="goToApology()">Belum Memaafkan? Kembali</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- floating cute icons -->
+  <div class="float s1">❤</div>
+  <div class="float s2">🍃</div>
+  <div class="float s3">🐱</div>
+
+  <script>
+    // Pages
+    const pages = {
+      envelope: document.getElementById('pageEnvelope'),
+      q1: document.getElementById('pageQ1'),
+      apology: document.getElementById('pageApology'),
+      q2: document.getElementById('pageQ2'),
+      line: document.getElementById('pageLine')
+    }
+
+    function showPage(p){
+      Object.values(pages).forEach(el=>el.classList.remove('active'));
+      p.classList.add('active');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    // Envelope open
+    const envelopeEl = document.getElementById('envelope');
+    function openEnvelope(){
+      envelopeEl.classList.add('env-open');
+      setTimeout(()=> showPage(pages.q1),700);
+    }
+
+    // Q1 logic
+    function answerQ1(isHijau){
+      if(isHijau){ showPage(pages.apology); startApology(); }
+      else{ showPage(pages.envelope); }
+    }
+
+    // Apology messages
+    const messages = [
+      "Hai, ini meov. Maafin meov ya hijau, meov membuat hijau sedih, marah, dan kecewa lagi. Hijau pasti muak deh sama meov yang minta maaf terus terusan tapi yauda kan meov emang salah.",
+      "Meov sadar tindakan meov sangat membuat hijau berpikiran macam macam dan meov sudah mengecewakan hijau. Tapi meov ingin belajar dan berubah dari kesalahan.",
+      "Terima kasih sudah mau dibuka dan dibaca. Meov sungguh berharap kita bisa baik lagi, meov gk mau kehilangan hijau. Hijau terlalu berharga untuk meov jaid tolong jangan pergi dari meov ",
+      "Hijau pernah bilang ke meov, tetap jadi rumah hijau ya?, iya hijau ini meov tunggu kok dirumah jadi jangan suruh meov buat gk nungguin hijau lagi ya, emang hijau mau pulang kemana kalo bukan kerumah sayangku?",
+      "Maafin meov ya atas kata-kata dan tidakan yang tak pada tempatnya. Meov berjanji akan lebih berhati-hati tapi tolong tetap dengarkan alasan dan penjelasan meov. Dari hati, meov meminta maaf. Semoga kita diberi kesempatan untuk memperbaiki."
+    ];
+    let idx = 0;
+    const msgEl = document.getElementById('msg');
+    const prevBtn = document.getElementById('prevMsg');
+    const nextBtn = document.getElementById('nextMsg');
+    const copyBtn = document.getElementById('copyMsg');
+
+    function renderMsg(){
+      msgEl.textContent = messages[idx];
+      prevBtn.disabled = idx===0;
+      nextBtn.textContent = (idx === messages.length-1)? 'Selesai Membaca' : 'Berikutnya ⟶';
+    }
+
+    function startApology(){ idx=0; renderMsg(); }
+
+    prevBtn.addEventListener('click', ()=>{ if(idx>0){ idx--; renderMsg(); }});
+    nextBtn.addEventListener('click', ()=>{
+      if(idx < messages.length-1){ idx++; renderMsg(); }
+      else { // selesai membaca semua -> lanjut ke Q2 otomatis
+        setTimeout(()=> showPage(pages.q2),400);
+      }
+    });
+
+    copyBtn.addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText(messages[idx]); alert('Teks pesan disalin'); }
+      catch{ alert('Gagal menyalin'); }
+    });
+
+    function answerQ2(isStillMad){
+      if(isStillMad){ showPage(pages.line); }
+      else{ // not mad -> show LINE contact
+        // open line directly as an invitation to respond
+        prepareLineLink(true);
+        showPage(pages.line);
+      }
+    }
+
+    function goToApology(){ showPage(pages.apology); }
+
+    // LINE link ready
+    function prepareLineLink(isForgiving){
+      const base = 'https://line.me/R/msg/text/?';
+      let text = isForgiving ? 'Aku sudah membaca dan aku memaafkanmu ❤️' : 'Aku sudah membaca, terima kasih.';
+      document.getElementById('lineLink').href = base + encodeURIComponent(text);
+    }
+
+    // when entering line page, prepare default message of forgiveness if user chose "tidak marah"
+    document.getElementById('pageLine').addEventListener('click', ()=> prepareLineLink(false));
+
+    // reset all
+    function resetAll(){ envelopeEl.classList.remove('env-open'); showPage(pages.envelope); }
+
+    // small touches: when user reaches line page via "Iya masih marah", set forgiving false to encourage further apology
+    // but give option to set forgiving true via link param
+
+    // initialize
+    showPage(pages.envelope);
+
+    // floating icons creation (randomized extra)
+    const icons = ['❤','💚','🌿','🍃','🐰','🐱','💌'];
+    function spawnRandomFloating(){
+      const el = document.createElement('div');
+      el.className = 'float';
+      el.style.left = Math.random()*90 + 'vw';
+      el.style.fontSize = (14 + Math.random()*26)+'px';
+      el.innerText = icons[Math.floor(Math.random()*icons.length)];
+      document.body.appendChild(el);
+      setTimeout(()=> el.remove(), 9000 + Math.random()*5000);
+    }
+    setInterval(spawnRandomFloating,900);
+  </script>
+</body>
+</html>
